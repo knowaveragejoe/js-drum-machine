@@ -1,0 +1,41 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    background-color: #222;
+}
+
+.pads {
+    display: flex;
+    flex: 1;
+    min-height: 50vh;
+    align-items: center;
+    justify-content: center;
+}
+
+.pad {
+    border: 1px solid black;
+    margin: 1em;
+    font-size: 1.5em;
+    padding: 1em 1.5em;
+    text-align: center;
+    color: white;
+    background: #000;
+    transition: all 0.1s ease;
+}
+
+.pressed {
+    border: 1px solid yellow;
+    box-shadow: 0 0 1rem #ffc600;
+}
+
+.soundNameDisplay {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+}
+
+#soundName {
+    color: white;
+    font-size: 5em;
+}
