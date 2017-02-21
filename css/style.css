@@ -1,7 +1,8 @@
 body, html {
     margin: 0;
     padding: 0;
-    background-color: #222;
+    background-color: #444;
+    font-family: Helvetica, sans-serif;
 }
 
 .pads {
@@ -38,4 +39,10 @@ body, html {
 #soundName {
     color: white;
     font-size: 5em;
+}
+
+#wave {
+    background-color: green;
+    padding: 0;
+    transition: 0.1s;
 }
