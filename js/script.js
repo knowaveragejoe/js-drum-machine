@@ -4,7 +4,7 @@ const DrumKit = function() {
     self.codes = [65,83,68,70,71,72,74,75,76];
     self.playing = false;
     self.analyser, self.audioSrc, self.soundNameDisplay, self.currentSound, self.frequencyData = null;
-    self.audioContexts = {};
+    self.audioContexts = {}, self.analysers = {};
 
     self.findSound = function(code) {
         let sound = document.querySelector(`audio[data-key="${code}"]`);
@@ -29,27 +29,37 @@ const DrumKit = function() {
 
     self.resetWave = function() {
         self.wave.style.padding = 0;
-    }
+    };
 
     self.clearSoundDisplay = function() {
         self.soundNameDisplay.innerHTML = '';
-    }
+    };
+
+    self.getAnalyser = function(code) {
+        if (self.analysers.code) {
+            return self.analysers.code;
+        }
+
+        return null;
+    };
 
     self.renderFrame = function() {
         self.analyser.getByteFrequencyData(self.frequencyData);
 
-        for (var i=0;i<self.frequencyData.length;i++) {
-            self.wave.style.padding = (self.frequencyData[i] * 2) + "px";
-        }
+        // for (var i=0;i<self.frequencyData.length;i++) {
+            self.wave.style.padding = (self.frequencyData[1] * 2) + "px";
+        // }
 
         if (self.playing) {
             window.requestAnimationFrame(self.renderFrame);
         } else {
             self.resetWave();
         }
-    }
+    };
 
     self.keyPressed = function(e) {
+        console.log(self.analysers);
+
         self.resetWave();
         self.clearSoundDisplay();
         let keyCode = e.keyCode;
@@ -62,35 +72,36 @@ const DrumKit = function() {
         let pad = self.findPad(e.keyCode);
 
         //highlight pad
-        if (pad) {
-            pad.classList.add('pressed');
-            self.soundNameDisplay.innerHTML = pad.getAttribute('data-soundname');
+        if (!pad) {
+            return;
         }
+
+        pad.classList.add('pressed');
+        self.soundNameDisplay.innerHTML = pad.getAttribute('data-soundname');
 
         //rewind and play sound
-        if (sound) {
-            self.currentSound = sound;
-            self.setUpAnalayser(keyCode);
-            self.currentSound.currentTime = 0;
-            self.currentSound.play();
-            self.playing = true;
-
-            //Visualize if possible
-            if (self.analyser) {
-                self.frequencyData = new Uint8Array(self.analyser.frequencyBinCount);
-                self.renderFrame();
-            }
+        if (!sound) {
+            return;
         }
+
+        self.currentSound = sound;
+        self.setUpAnalayser(keyCode);
+        self.analyser = self.getAnalyser(keyCode);
+        self.currentSound.currentTime = 0;
+        self.currentSound.play();
+        self.playing = true;
+
+        //Visualize if possible
+        if (!self.analyser) {
+            return;
+        }
+
+        self.frequencyData = new Uint8Array(self.analyser.frequencyBinCount);
+        self.renderFrame();
     };
 
-    self.ended = function(e) {
-        self.playing = false;
-        self.resetWave();
-        self.clearSoundDisplay();
-    }
-
     self.setUpAnalayser = function(code) {
-        if (self.audioContexts.code) {
+        if (self.audioContexts[code]) {
             return;
         }
 
@@ -105,9 +116,15 @@ const DrumKit = function() {
         audioSrc.connect(analyser);
         audioSrc.connect(audioCtx.destination);
 
-        self.audioContexts.code = audioCtx;
-        self.analyser = analyser;
+        self.audioContexts[code] = audioCtx;
+        self.analysers[code] = analyser;
     };
+
+    self.ended = function(e) {
+        self.playing = false;
+        self.resetWave();
+        self.clearSoundDisplay();
+    }
 
     self.init = function() {
         self.soundNameDisplay = document.getElementById('soundName');
