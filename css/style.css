@@ -42,7 +42,8 @@ body, html {
 }
 
 #wave {
-    background-color: green;
-    padding: 0;
-    transition: 0.1s;
+    background-color: rgba(80, 200, 255, 0.26);
+    padding: 50px;
+    transition: 0.05s;
+    position: absolute;
 }

@@ -47,7 +47,11 @@ const DrumKit = function() {
         self.analyser.getByteFrequencyData(self.frequencyData);
 
         for (var i=0;i<self.frequencyData.length;i++) {
-            self.wave.style.padding = (self.frequencyData[1] * 2) + "px";
+            let scale = self.frequencyData[i] / 8;
+            let rotate = self.frequencyData[i] * 2;
+
+            self.wave.style.transform = `rotate(${rotate}deg)`;
+            self.wave.style.transform = `scale(${scale}, ${scale})`;
         }
 
         if (self.playing) {
@@ -65,6 +69,7 @@ const DrumKit = function() {
         if (self.codes.indexOf(keyCode) < 0) {
             return; //not a key we care about
         }
+        self.wave.style.padding = '50px';
 
         let sound = self.findSound(e.keyCode);
         let pad = self.findPad(e.keyCode);
