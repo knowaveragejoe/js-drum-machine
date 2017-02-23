@@ -46,9 +46,9 @@ const DrumKit = function() {
     self.renderFrame = function() {
         self.analyser.getByteFrequencyData(self.frequencyData);
 
-        // for (var i=0;i<self.frequencyData.length;i++) {
+        for (var i=0;i<self.frequencyData.length;i++) {
             self.wave.style.padding = (self.frequencyData[1] * 2) + "px";
-        // }
+        }
 
         if (self.playing) {
             window.requestAnimationFrame(self.renderFrame);
@@ -58,8 +58,6 @@ const DrumKit = function() {
     };
 
     self.keyPressed = function(e) {
-        console.log(self.analysers);
-
         self.resetWave();
         self.clearSoundDisplay();
         let keyCode = e.keyCode;
@@ -85,8 +83,7 @@ const DrumKit = function() {
         }
 
         self.currentSound = sound;
-        self.setUpAnalayser(keyCode);
-        self.analyser = self.getAnalyser(keyCode);
+        // self.setUpAnalayser(keyCode);
         self.currentSound.currentTime = 0;
         self.currentSound.play();
         self.playing = true;
@@ -101,23 +98,13 @@ const DrumKit = function() {
     };
 
     self.setUpAnalayser = function(code) {
-        if (self.audioContexts[code]) {
-            return;
+        //create new audio context?
+        if (!self.audioCtx) {
+            self.audioCtx = new AudioContext();
         }
 
-        var audioCtx = new AudioContext();
-        var audioElement = self.currentSound;
-        var audioSrc = audioCtx.createMediaElementSource(audioElement);
-        var audioSrc = audioSrc;
-        var analyser = audioCtx.createAnalyser();
-        // analyser.smoothingTimeConstant = 0.3;
-        // analyser.fftSize = 512;
-
-        audioSrc.connect(analyser);
-        audioSrc.connect(audioCtx.destination);
-
-        self.audioContexts[code] = audioCtx;
-        self.analysers[code] = analyser;
+        var analyser = self.audioCtx.createAnalyser();
+        self.analyser = analyser;
     };
 
     self.ended = function(e) {
@@ -137,9 +124,18 @@ const DrumKit = function() {
         const pads = Array.from(document.querySelectorAll('.pad'));
         pads.forEach(pad => pad.addEventListener('transitionend', self.removeTransition));
 
+        self.setUpAnalayser();
+
         //Attach stopped playing listeners to each audio element
+        //Set up analysers for each sound
         const sounds = Array.from(document.querySelectorAll('audio'));
-        sounds.forEach(sound => sound.addEventListener('ended', self.ended));
+        sounds.forEach(sound => {
+            sound.addEventListener('ended', self.ended);
+
+            var audioSrc = self.audioCtx.createMediaElementSource(sound);
+            audioSrc.connect(self.analyser);
+            audioSrc.connect(self.audioCtx.destination);
+        });
     };
 
     self.init();
